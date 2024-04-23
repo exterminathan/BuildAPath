@@ -46,7 +46,7 @@ class Path extends Phaser.Scene {
         });
 
         // TODO:
-        //  - set the run mode flag to false (after implenting run mode)
+        this.runMode = false;
 
         // Create enemyShip as a follower type of sprite
         // Call startFollow() on enemyShip to have it follow the curve
@@ -90,11 +90,9 @@ class Path extends Phaser.Scene {
 
         if (Phaser.Input.Keyboard.JustDown(this.ESCKey)) {
             console.log("Clear path");
-            // TODO: 
-            // * Add code to check if run mode is active
-            //   If run mode is active, then don't call clearPoints()
-            //   (i.e., can only clear points when not in run mode)
-
+            if (!this.runMode) {
+                this.clearPoints();
+            }
             this.clearPoints();
 
         }
@@ -104,53 +102,42 @@ class Path extends Phaser.Scene {
         if (Phaser.Input.Keyboard.JustDown(this.oKey)) {
             console.log("Output the points");
 
-            // TODO:
-            // * Print out the points comprising the line
-            //   use a "for ... of" loop to iterate through the
-            //   elements of this.curve.points 
-            //
-            // Format them in the form of an array, so you can copy/paste into
-            // your gallery shooter game:
-            // [
-            //  point0.x, point0.y,
-            //  point1.x, point1.y
-            // ]
+            let pointsOutStr = "[\n";
+            for (let point of this.curve.points) {
+                pointsOutStr += "\t" + point.x + ", " + point.y + ",\n";
+            }
+
+            pointsOutStr = pointsOutStr.slice(0, -2);
+            pointsOutStr += "\n]";
+
+            console.log(pointsOutStr);
         }   
 
         if (Phaser.Input.Keyboard.JustDown(this.rKey)) {
             console.log("Run mode");
-            //
-            // TODO: 
-            // Implement run mode
-            // Check for runMode active
-            //   If active:
-            //   - call stopFollow on the enemyShip to halt following behavior
-            //   - make the enemyShip sprite invisible
-            //   - set sprite mode to false
-            //  If not active:
-            //   - set sprite mode to true
-            //   - set the location of enemyship to the first point on the curve
-            //     (get this from the zero'th element of this.curve.points array,
-            //      e.g., this.curve.points[0].x)
-            //     (sprites like enemyShip have .x and .y properties)
-            //     Be careful! What happens if this.curve.points is empty?? Perhaps
-            //     you should check for this condition...
-            //   - make the enemyShip sprite visible
-            //   - call startFollow on enemyShip with the following configuration
-            //     object:
-            // {
-            //     from: 0,
-            //     to: 1,
-            //     delay: 0,
-            //     duration: 2000,
-            //     ease: 'Sine.easeInOut',
-            //     repeat: -1,
-            //     yoyo: true,
-            //     rotateToPath: true,
-            //     rotationOffset: -90
-            // }
+            if (!this.runMode) {
+                if (this.curve.points.length > 0) {
+                    this.runMode = true;
+                    my.sprite.enemyShip.visible = true;
+                    my.sprite.enemyShip.setPosition(this.curve.points[0].x, this.curve.points[0].y);
+                    my.sprite.enemyShip.startFollow({
+                        from: 0,
+                        to: 1,
+                        delay: 0,
+                        duration: 2000,
+                        ease: 'Sine.easeInOut',
+                        repeat: -1,
+                        yoyo: true,
+                        rotateToPath: true,
+                        rotationOffset: -90
+                    });
+                }
+            } else {
+                this.runMode = false;
+                my.sprite.enemyShip.stopFollow();
+                my.sprite.enemyShip.visible = false;
+            }
         }
-
     }
 
 }
